@@ -46,7 +46,11 @@ class Nori
         alias cdata_block characters
 
         def error(message)
-          @last_error = message
+          if (invalid_chr = message[/PCDATA invalid Char value (\d+)/, 1])
+            characters(invalid_chr.to_i.chr)
+          else
+            @last_error = message
+          end
         end
       end
 
@@ -54,7 +58,9 @@ class Nori
         document = Document.new
         document.options = options
         parser = ::Nokogiri::XML::SAX::Parser.new document
-        parser.parse xml
+        parser.parse xml do |ctx|
+          ctx.recovery = true
+        end
         raise ParseError, document.last_error if document.last_error
         document.stack.length > 0 ? document.stack.pop.to_hash : {}
       end
