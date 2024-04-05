@@ -644,6 +644,10 @@ describe Nori do
         expect { parse('<foo><bar>foo bar</foo>') }.to raise_error(Nori::ParseError)
       end
 
+      it "should preserve control characters" do
+        xml = "<tag>a\u0002c</tag>".force_encoding('UTF-8')
+        expect(parse(xml)["tag"]).to eq("a\u0002c")
+      end
     end
   end
 
